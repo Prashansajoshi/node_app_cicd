@@ -40,6 +40,7 @@ jobs:
           npm run build  # Run build if applicable
           pm2 restart all  # Restart application with PM2
         EOF
+        echo "Deployment finished"
       env:
         SSH_KEY: ${{ secrets.SSH_KEY }}
         EC2_USER: ${{ secrets.EC2_USER }}
