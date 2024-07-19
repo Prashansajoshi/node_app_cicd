@@ -35,7 +35,7 @@ jobs:
       run: |
         ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_KEY }} ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
           cd /home/ubuntu
-          git pull stage
+          git pull origin main
           npm install
           npm run build  # Run build if applicable
           pm2 restart all  # Restart application with PM2
@@ -44,3 +44,4 @@ jobs:
         SSH_KEY: ${{ secrets.SSH_KEY }}
         EC2_USER: ${{ secrets.EC2_USER }}
         EC2_HOST: ${{ secrets.EC2_HOST }}
+    
