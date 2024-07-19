@@ -34,8 +34,8 @@ jobs:
     - name: Deploy to EC2
       run: |
         ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_KEY }} ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-          cd /home/ubuntu/app
-          git pull origin main
+          cd /home/ubuntu
+          git pull stage
           npm install
           npm run build  # Run build if applicable
           pm2 restart all  # Restart application with PM2
