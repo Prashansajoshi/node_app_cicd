@@ -32,19 +32,47 @@ jobs:
       run: npm run build  # If you have a build step, otherwise you can skip this
 
     - name: Deploy to EC2
-      run: |
-        echo "Starting SSH connection..."
-        ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_KEY }} ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-          echo "Connected to EC2"
-          cd /home/ubuntu
-          git pull origin main
-          npm install
-          npm run build  # Run build if applicable
-          pm2 restart all  # Restart application with PM2
-        EOF
-        echo "Deployment script executed"
       env:
         SSH_KEY: ${{ secrets.SSH_KEY }}
         EC2_USER: ${{ secrets.EC2_USER }}
         EC2_HOST: ${{ secrets.EC2_HOST }}
-    
+      run: |
+        echo "Starting SSH connection..."
+        ssh -o StrictHostKeyChecking=no -i $SSH_KEY $EC2_USER@$EC2_HOST << 'EOF'
+          echo "Connected to EC2"
+
+          # Navigate to the app directory
+          cd /path/to/your/app
+
+          # Pull the latest code
+          git pull origin main
+
+          # Install dependencies and build the app
+          npm install
+          npm run build
+
+          # Restart the app (assuming you use pm2)
+          pm2 restart all
+
+          # Ensure Nginx is installed and configured
+          sudo apt-get update
+          sudo apt-get install -y nginx
+          sudo tee /etc/nginx/sites-available/default > /dev/null <<EOT
+          server {
+              listen 80;
+              server_name your_domain_or_ip;
+
+              location / {
+                  proxy_pass http://localhost:3000;
+                  proxy_http_version 1.1;
+                  proxy_set_header Upgrade \$http_upgrade;
+                  proxy_set_header Connection 'upgrade';
+                  proxy_set_header Host \$host;
+                  proxy_cache_bypass \$http_upgrade;
+              }
+          }
+          EOT
+
+          # Restart Nginx to apply the changes
+          sudo systemctl restart nginx
+        EOF
